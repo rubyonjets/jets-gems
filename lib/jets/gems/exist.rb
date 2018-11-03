@@ -1,3 +1,5 @@
+require 'open-uri'
+
 module Jets::Gems
   class Exist
     def initialize(options)
@@ -31,7 +33,7 @@ module Jets::Gems
       end
       res = req.request_head(url.path)
       res.code == "200"
-    rescue SocketError, OpenURI::HTTPError
+    rescue SocketError, OpenURI::HTTPError, OpenSSL::SSL::SSLError
       false
     end
 

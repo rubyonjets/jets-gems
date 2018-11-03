@@ -20,7 +20,7 @@ module Jets::Gems
     #     "pg-0.21.0" => "https://anothersource.com",
     #   }
     #
-    def run
+    def run!
       puts "Checking projects gems for pre-built Lambda gems..."
       found_gems = {}
       compiled_gems.each do |gem_name|
@@ -40,6 +40,16 @@ module Jets::Gems
           @missing_gems << gem_name
         end
       end
+
+      unless @missing_gems.empty?
+        # Exits early if not all the linux gems are available.
+        # Better to error now than deploy a broken package to AWS Lambda.
+        # Provide users with message about using their own lambdagems source.
+        puts missing_message
+        Report.missing(@missing_gems)
+        exit 1
+      end
+
       found_gems
     end
 
@@ -65,7 +75,7 @@ Jets is unable to build a deployment package that will work on AWS Lambda withou
 * Wait until it added to lambdagems.com. No need to report this to us, as we've already been notified.
 * Use another gem that does not require compilation.
 
-Compiled gems usually take some time to figure out how to build as they each depend on different libraries and packages. We make an effort add new gems as soon as we can.
+Compiled gems usually take some time to figure out how to build as they each depend on different libraries and packages.
 EOL
       erb = ERB.new(template, nil, '-') # trim mode https://stackoverflow.com/questions/4632879/erb-template-removing-the-trailing-line
       erb.result(binding)
