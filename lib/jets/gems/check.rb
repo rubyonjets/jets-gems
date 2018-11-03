@@ -26,7 +26,7 @@ module Jets::Gems
       compiled_gems.each do |gem_name|
         puts "Checking #{gem_name}..." if @options[:cli]
         gem_exists = false
-        Jets.config.lambdagems.sources.each do |source|
+        Jets.config.gems.sources.each do |source|
           exist = Jets::Gems::Exist.new(source_url: source)
           found = exist.check(gem_name)
           # gem exists on at least of the lambdagem sources
@@ -55,7 +55,7 @@ Your project requires compiled gems were not available in any of your lambdagems
 <% end %>
 
 Your current lambdagems sources:
-<% Jets.config.lambdagems.sources.map do |source| %>
+<% Jets.config.gems.sources.map do |source| %>
 * <%= source -%>
 <% end %>
 
