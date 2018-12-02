@@ -46,7 +46,9 @@ module Jets::Gems
         # Better to error now than deploy a broken package to AWS Lambda.
         # Provide users with message about using their own lambdagems source.
         puts missing_message
-        Report.missing(@missing_gems)
+
+        agree.prompt
+        Report.missing(@missing_gems) if agree.yes?
         exit 1
       end
 
@@ -72,14 +74,25 @@ Your current lambdagems sources:
 Jets is unable to build a deployment package that will work on AWS Lambda without the required pre-compiled gems. To remedy this, you can:
 
 * Build the gem yourself and add it to your own custom lambdagems sources. Refer to the Lambda Gems Docs: http://rubyonjets.com/docs/lambdagems
-* Wait until it added to lambdagems.com. No need to report this to us, as we've already been notified.
 * Use another gem that does not require compilation.
+* Wait until it added to lambdagems.com.
+<% if agree.yes? -%>
+* No need to report this to us, as we've already been notified.
+<% elsif agree.no? -%>
+* You have choosen not to report data to lambdagems so we will not be notified about these missing gems.  If you change your mind you can edit ~/.jets/agree
+<% end -%>
 
 Compiled gems usually take some time to figure out how to build as they each depend on different libraries and packages.
+
 EOL
       erb = ERB.new(template, nil, '-') # trim mode https://stackoverflow.com/questions/4632879/erb-template-removing-the-trailing-line
       erb.result(binding)
     end
+
+    def agree
+      Agree.new
+    end
+    memoize :agree
 
     # If there are subfolders compiled_gem_paths might have files deeper
     # in the directory tree.  So lets grab the gem name and figure out the

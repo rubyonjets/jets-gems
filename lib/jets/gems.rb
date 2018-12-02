@@ -2,6 +2,7 @@ require "jets/gems/version"
 
 module Jets
   module Gems
+    autoload :Agree, 'jets/gems/agree'
     autoload :Check, 'jets/gems/check'
     autoload :Exist, 'jets/gems/exist'
     autoload :Extract, 'jets/gems/extract'
