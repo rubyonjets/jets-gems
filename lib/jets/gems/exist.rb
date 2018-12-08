@@ -25,7 +25,7 @@ module Jets::Gems
     end
 
     # Example url:
-    #   https://gems.lambdagems.com/gems/2.5.0/byebug/byebug-9.1.0-x86_64-linux.tgz
+    #   https://gems2.lambdagems.com/gems/2.5.0/byebug/byebug-9.1.0.zip
     def url_exists?(url)
       url = URI.parse(url)
       req = Net::HTTP.new(url.host, url.port).tap do |http|
@@ -43,14 +43,14 @@ module Jets::Gems
 
     # gem_name: byebug-9.1.0
     # Example url:
-    #   https://gems.lambdagems.com/gems/2.5.0/byebug/byebug-9.1.0-x86_64-linux.tgz
+    #   https://gems2.lambdagems.com/gems/2.5.0/byebug/byebug-9.1.0.zip
     def gem_url(gem_name)
       folder = gem_name.gsub(/-(\d+\.\d+\.\d+.*)/,'') # folder: byebug
-      "#{source_url}/gems/#{Jets::Gems.ruby_version_folder}/#{folder}/#{gem_name}-x86_64-linux.tgz"
+      "#{source_url}/gems/#{Jets::Gems.ruby_folder}/#{folder}/#{gem_name}.zip"
     end
 
-    def ruby_version_folder
-      Jets::Gems.ruby_version_folder
+    def ruby_folder
+      Jets::Gems.ruby_folder
     end
   end
 end
