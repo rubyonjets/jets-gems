@@ -126,20 +126,20 @@ EOL
     #
     # Example paths:
     # Macosx:
-    #   bundled/gems/ruby/2.5.0/extensions/x86_64-darwin-16/2.5.0-static/nokogiri-1.8.1
-    #   bundled/gems/ruby/2.5.0/extensions/x86_64-darwin-16/2.5.0-static/byebug-9.1.0
+    #   vendor/bundle/ruby/2.5.0/extensions/x86_64-darwin-16/2.5.0-static/nokogiri-1.8.1
+    #   vendor/bundle/ruby/2.5.0/extensions/x86_64-darwin-16/2.5.0-static/byebug-9.1.0
     # Official AWS Lambda Linux AMI:
-    #   bundled/gems/ruby/2.5.0/extensions/x86_64-linux/2.5.0-static/nokogiri-1.8.1
+    #   vendor/bundle/ruby/2.5.0/extensions/x86_64-linux/2.5.0-static/nokogiri-1.8.1
     # Circleci Ubuntu based Linux:
-    #   bundled/gems/ruby/2.5.0/extensions/x86_64-linux/2.5.0/pg-0.21.0
+    #   vendor/bundle/ruby/2.5.0/extensions/x86_64-linux/2.5.0/pg-0.21.0
     def compiled_gem_paths
-      Dir.glob("#{Jets.build_root}/cache/bundled/gems/ruby/*/extensions/**/**/*.{so,bundle}")
+      Dir.glob("#{Jets.build_root}/cache/vendor/bundle/ruby/*/extensions/**/**/*.{so,bundle}")
     end
 
-    # Input: bundled/gems/ruby/2.5.0/extensions/x86_64-darwin-16/2.5.0-static/byebug-9.1.0
+    # Input: vendor/bundle/ruby/2.5.0/extensions/x86_64-darwin-16/2.5.0-static/byebug-9.1.0
     # Output: byebug-9.1.0
     def gem_name_from_path(path)
-      regexp = /gems\/ruby\/\d+\.\d+\.\d+\/extensions\/.*?\/.*?\/(.*?)\//
+      regexp = /vendor\/bundle\/ruby\/\d+\.\d+\.\d+\/extensions\/.*?\/.*?\/(.*?)\//
       gem_name = path.match(regexp)[1]
     end
 

@@ -9,8 +9,8 @@ module Jets::Gems::Extract
       @name = name
       @options = options
 
-      @downloads_root = options[:downloads_root] || "/tmp/jets/lambdagems"
-      @source_url = options[:source_url] || "https://gems.lambdagems.com"
+      @downloads_root = options[:downloads_root] || "/tmp/jets/#{Jets.config.project_name}/lambdagems"
+      @source_url = options[:source_url] || Jets.default_gems_source
     end
 
     def clean_downloads(folder)
@@ -19,15 +19,8 @@ module Jets::Gems::Extract
       FileUtils.rm_rf(path)
     end
 
-    def unpack_tarball(tarball_path)
-      dest = project_root
-      say "Unpacking into #{dest}"
-      FileUtils.mkdir_p(dest)
-      untar(tarball_path, dest)
-    end
-
-    def untar(tarball_path, parent_folder_dest)
-      sh("tar -xzf #{tarball_path} -C #{parent_folder_dest}")
+    def unzip(zipfile_path, parent_folder_dest)
+      sh("cd #{parent_folder_dest} && unzip -qo #{zipfile_path}")
     end
 
     def sh(command)

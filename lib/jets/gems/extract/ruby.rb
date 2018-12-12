@@ -1,6 +1,6 @@
 # Usage:
 #
-#   Jets::Gems::Extract::Ruby.new("2.5.0",
+#   Jets::Gems::Extract::Ruby.new("2.5.3",
 #     downloads_root: cache_area, # defaults to /tmp/lambdagem
 #     dest: cache_area, # defaults to . (project_root)
 #   ).run
@@ -12,13 +12,22 @@ module Jets::Gems::Extract
     def run
       say "Looking for #{full_ruby_name}"
       clean_downloads(:rubies) if @options[:clean]
-      tarball_path = download_ruby
-      unpack_tarball(tarball_path)
-      say("Ruby #{full_ruby_name} unpacked at #{project_root}", :debug)
+      zip_path = download_ruby
+      unzip(zip_path)
+    end
+
+    def unzip(path)
+      dest = "#{Jets.build_root}/stage/code/opt"
+      say "Unpacking into #{dest}"
+      FileUtils.mkdir_p(dest)
+      # cd-ing dest unzips the files into that folder
+      sh("cd #{dest} && unzip -qo #{path}")
+      say("Ruby #{full_ruby_name} unziped at #{dest}", :debug)
     end
 
     def download_ruby
       url = ruby_url
+      puts "download ruby url #{url}"
       tarball_dest = download_file(url, download_path(File.basename(url)))
       unless tarball_dest
         message = "Url: #{url} not found"
@@ -29,7 +38,7 @@ module Jets::Gems::Extract
           raise NotFound.new(message)
         end
       end
-      say "Tarball downloaded to: #{tarball_dest}"
+      say "Downloaded to: #{tarball_dest}"
       tarball_dest
     end
 
@@ -42,16 +51,16 @@ module Jets::Gems::Extract
     #
     # Example:
     #
-    #    2.5.0           -> ruby-2.5.0-linux-x86_64.tgz
-    #    ruby-2.5.0      -> ruby-2.5.0-linux-x86_64.tgz
-    #    test-ruby-2.5.0 -> test-ruby-2.5.0-linux-x86_64.tgz
+    #    2.5.3           -> ruby-2.5.3.zip
+    #    ruby-2.5.3      -> ruby-2.5.3.zip
+    #    test-ruby-2.5.3 -> test-ruby-2.5.3.zip
     def full_ruby_name
       md = @name.match(/^(\d+\.\d+\.\d+)$/)
       if md
         ruby_version = md[1]
-        "ruby-#{ruby_version}-linux-x86_64.tgz"
+        "ruby-#{ruby_version}.zip"
       else
-        "#{@name}-linux-x86_64.tgz"
+        "#{@name}.zip"
       end
     end
 

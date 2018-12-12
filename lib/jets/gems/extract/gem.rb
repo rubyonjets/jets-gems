@@ -14,10 +14,17 @@ module Jets::Gems::Extract
     def run
       say "Looking for #{full_gem_name} gem in: #{@options[:source_url]}"
       clean_downloads(:gems) if @options[:clean]
-      tarball_path = download_gem
+      zipfile_path = download_gem
       remove_current_gem
-      unpack_tarball(tarball_path)
+      unzip_file(zipfile_path)
       say("Gem #{full_gem_name} unpacked at #{project_root}", :debug)
+    end
+
+    def unzip_file(zipfile_path)
+      dest = "#{Jets.build_root}/stage/code/opt"
+      say "Unpacking into #{dest}"
+      FileUtils.mkdir_p(dest)
+      unzip(zipfile_path, dest)
     end
 
     # ensure that we always have the full gem name
@@ -45,7 +52,7 @@ module Jets::Gems::Extract
     # The folder contains the re-produced directory structure. Example with
     # the gem: byebug-9.1.0
     #
-    #   bundled/gems/ruby/2.5.0/extensions/x86_64-darwin-16/2.5.0-static/byebug-9.1.0
+    #   vendor/bundle/ruby/2.5.0/extensions/x86_64-darwin-16/2.5.0-static/byebug-9.1.0
     #
     def download_gem
       # download - also move to /tmp/jets/demo/compiled_gems folder
@@ -60,7 +67,7 @@ module Jets::Gems::Extract
           raise NotFound.new(message)
         end
       end
-      say "Tarball downloaded to: #{tarball_dest}"
+      say "Downloaded to: #{tarball_dest}"
       tarball_dest
     end
 
@@ -77,7 +84,7 @@ module Jets::Gems::Extract
       say "Removing current #{full_gem_name} gem installation:"
       gem_dirs = Dir.glob("#{project_root}/**/*").select do |path|
                   File.directory?(path) &&
-                  path =~ %r{bundled/gems} &&
+                  path =~ %r{vendor/bundle} &&
                   File.basename(path) == full_gem_name
                 end
       gem_dirs.each do |dir|
@@ -88,11 +95,11 @@ module Jets::Gems::Extract
 
     # full_gem_name: byebug-9.1.0
     def gem_url
-      "#{source_url}/gems/#{ruby_version_folder}/#{gem_name}/#{full_gem_name}-x86_64-linux.tgz"
+      "#{source_url}/gems/#{ruby_folder}/#{gem_name}/#{full_gem_name}.zip"
     end
 
-    def ruby_version_folder
-      Jets::Gems.ruby_version_folder
+    def ruby_folder
+      Jets::Gems.ruby_folder
     end
   end
 end
