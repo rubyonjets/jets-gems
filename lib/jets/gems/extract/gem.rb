@@ -52,7 +52,7 @@ module Jets::Gems::Extract
     # The folder contains the re-produced directory structure. Example with
     # the gem: byebug-9.1.0
     #
-    #   vendor/bundle/ruby/2.5.0/extensions/x86_64-darwin-16/2.5.0-static/byebug-9.1.0
+    #   vendor/gems/ruby/2.5.0/extensions/x86_64-darwin-16/2.5.0-static/byebug-9.1.0
     #
     def download_gem
       # download - also move to /tmp/jets/demo/compiled_gems folder
@@ -84,7 +84,7 @@ module Jets::Gems::Extract
       say "Removing current #{full_gem_name} gem installation:"
       gem_dirs = Dir.glob("#{project_root}/**/*").select do |path|
                   File.directory?(path) &&
-                  path =~ %r{vendor/bundle} &&
+                  path =~ %r{vendor/gems} &&
                   File.basename(path) == full_gem_name
                 end
       gem_dirs.each do |dir|
