@@ -23,7 +23,6 @@ module Jets::Gems
     def run!
       puts "Checking projects gems for pre-built Lambda gems..."
       found_gems = {}
-      puts "compiled_gems #{compiled_gems.inspect}"
       compiled_gems.each do |gem_name|
         puts "Checking #{gem_name}..." if @options[:cli]
         gem_exists = false
@@ -99,8 +98,6 @@ EOL
     # in the directory tree.  So lets grab the gem name and figure out the
     # unique paths of the compiled gems from there.
     def compiled_gems
-      # puts "Jets::Gems::Check#compiled_gem_paths #{compiled_gem_paths.inspect}"
-
       # @use_gemspec option  finds compile gems with Gem::Specification
       # The normal build process does not use this and checks the file system.
       # So @use_gemspec is only used for this command:
@@ -174,9 +171,7 @@ EOL
     end
 
     def gemspec_compiled_gems
-      x = specs_with_extensions.map(&:full_name)
-      # puts "gemspec_compiled_gems #{x.inspect}".colorize(:yellow)
-      x
+      specs_with_extensions.map(&:full_name)
     end
 
     # Filter out the weird special case gems that bundler deletes?
