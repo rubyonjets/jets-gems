@@ -23,6 +23,7 @@ module Jets::Gems
     def run!
       puts "Checking projects gems for pre-built Lambda gems..."
       found_gems = {}
+      puts "compiled_gems #{compiled_gems.inspect}"
       compiled_gems.each do |gem_name|
         puts "Checking #{gem_name}..." if @options[:cli]
         gem_exists = false
@@ -98,6 +99,8 @@ EOL
     # in the directory tree.  So lets grab the gem name and figure out the
     # unique paths of the compiled gems from there.
     def compiled_gems
+      # puts "Jets::Gems::Check#compiled_gem_paths #{compiled_gem_paths.inspect}"
+
       # @use_gemspec option  finds compile gems with Gem::Specification
       # The normal build process does not use this and checks the file system.
       # So @use_gemspec is only used for this command:
@@ -115,10 +118,10 @@ EOL
         # one is scoped to Bundler and will only included gems used in the project.
         # This handles the possiblity of stale gems leftover from previous builds
         # in the cache.
-        compiled_gems.select { |g| gemspec_compiled_gems.include?(g) }
+        # TODO: figure out if we need
+        # compiled_gems.select { |g| gemspec_compiled_gems.include?(g) }
       end
     end
-    memoize :compiled_gems
 
     # Use pre-compiled gem because the gem could have development header shared
     # object file dependencies.  The shared dependencies are packaged up as part
@@ -126,20 +129,20 @@ EOL
     #
     # Example paths:
     # Macosx:
-    #   vendor/gems/ruby/2.5.0/extensions/x86_64-darwin-16/2.5.0-static/nokogiri-1.8.1
-    #   vendor/gems/ruby/2.5.0/extensions/x86_64-darwin-16/2.5.0-static/byebug-9.1.0
+    #   opt/ruby/gems/2.5.0/extensions/x86_64-darwin-16/2.5.0-static/nokogiri-1.8.1
+    #   opt/ruby/gems/2.5.0/extensions/x86_64-darwin-16/2.5.0-static/byebug-9.1.0
     # Official AWS Lambda Linux AMI:
-    #   vendor/gems/ruby/2.5.0/extensions/x86_64-linux/2.5.0-static/nokogiri-1.8.1
+    #   opt/ruby/gems/2.5.0/extensions/x86_64-linux/2.5.0-static/nokogiri-1.8.1
     # Circleci Ubuntu based Linux:
-    #   vendor/gems/ruby/2.5.0/extensions/x86_64-linux/2.5.0/pg-0.21.0
+    #   opt/ruby/gems/2.5.0/extensions/x86_64-linux/2.5.0/pg-0.21.0
     def compiled_gem_paths
-      Dir.glob("#{Jets.build_root}/cache/vendor/gems/ruby/*/extensions/**/**/*.{so,bundle}")
+      Dir.glob("#{Jets.build_root}/stage/opt/ruby/gems/*/extensions/**/**/*.{so,bundle}")
     end
 
-    # Input: vendor/gems/ruby/2.5.0/extensions/x86_64-darwin-16/2.5.0-static/byebug-9.1.0
+    # Input: opt/ruby/gems/2.5.0/extensions/x86_64-darwin-16/2.5.0-static/byebug-9.1.0
     # Output: byebug-9.1.0
     def gem_name_from_path(path)
-      regexp = %r{vendor/gems/ruby/\d+\.\d+\.\d+/extensions/.*?/.*?/(.*?)/}
+      regexp = %r{opt/ruby/gems/\d+\.\d+\.\d+/extensions/.*?/.*?/(.*?)/}
       path.match(regexp)[1] # gem_name
     end
 
@@ -156,13 +159,24 @@ EOL
     # Thanks: https://gist.github.com/aelesbao/1414b169a79162b1d795 and
     #   https://stackoverflow.com/questions/5165950/how-do-i-get-a-list-of-gems-that-are-installed-that-have-native-extensions
     def specs_with_extensions
+      # puts "Jets::Gems::Check#specs_with_extensions".colorize(:red)
+      # puts "BUNDLE_GEMFILE #{ENV['BUNDLE_GEMFILE'].inspect}"
+      # puts "Jets.root #{Jets.root}"
+      # puts "Dir.pwd #{Dir.pwd}"
+      # ENV['BUNDLE_GEMFILE'] = nil
+      # puts "BUNDLE_GEMFILE2 #{ENV['BUNDLE_GEMFILE'].inspect}"
+      # gemfile = IO.readlines("#{Dir.pwd}/Gemfile")
+      # puts gemfile
+
       specs = Gem::Specification.each.select { |spec| spec.extensions.any?  }
       specs.reject! { |spec| weird_gems.include?(spec.name) }
       specs
     end
 
     def gemspec_compiled_gems
-      specs_with_extensions.map(&:full_name)
+      x = specs_with_extensions.map(&:full_name)
+      # puts "gemspec_compiled_gems #{x.inspect}".colorize(:yellow)
+      x
     end
 
     # Filter out the weird special case gems that bundler deletes?

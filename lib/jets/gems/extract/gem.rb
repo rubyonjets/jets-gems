@@ -21,7 +21,7 @@ module Jets::Gems::Extract
     end
 
     def unzip_file(zipfile_path)
-      dest = "#{Jets.build_root}/stage/code/opt"
+      dest = "#{Jets.build_root}/stage/opt"
       say "Unpacking into #{dest}"
       FileUtils.mkdir_p(dest)
       unzip(zipfile_path, dest)
