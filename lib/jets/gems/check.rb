@@ -47,7 +47,6 @@ module Jets::Gems
         # Provide users with message about using their own lambdagems source.
         puts missing_message
 
-        agree.prompt
         Report.missing(@missing_gems) if agree.yes?
         exit 1
       end

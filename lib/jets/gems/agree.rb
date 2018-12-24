@@ -8,8 +8,12 @@ module Jets::Gems
     def prompt
       return if File.exist?(@agree_file)
 
-      puts "The Jets project contains binary gems that are not yet available in your gems source. You can help make Jets and the community better by reporting the missing binary gems.  Reported gems get built more quickly.  BoltOps takes privacy seriously and only collects anonymous non-identifiable data. You will only be asked this once."
-      puts "Do you want send reporting data to BoltOps? (Y/n)?"
+      puts <<~EOL
+        Jets sends data about your gems to your specified lambda build service **lambdagems.com** so that it can compile and generate the necessary Lambda layers.  Lambdagems only collects anonymous non-identifiable data.
+
+        Is it okay to send your gem data to Lambdagems? (Y/n)?
+      EOL
+
       answer = $stdin.gets.strip
       value = answer =~ /y/i ? 'yes' : 'no'
 
