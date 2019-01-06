@@ -17,7 +17,7 @@ module Jets::Gems::Extract
       zipfile_path = download_gem
       remove_current_gem
       unzip_file(zipfile_path)
-      say("Gem #{full_gem_name} unpacked at #{project_root}", :debug)
+      say("Gem #{full_gem_name} unpacked at #{project_root}")
     end
 
     def unzip_file(zipfile_path)
