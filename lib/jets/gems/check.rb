@@ -72,9 +72,9 @@ Your current lambdagems sources:
 
 Jets is unable to build a deployment package that will work on AWS Lambda without the required pre-compiled gems. To remedy this, you can:
 
-* Build the gem yourself and add it to your own custom lambdagems sources. Refer to the Lambda Gems Docs: http://rubyonjets.com/docs/lambdagems
 * Use another gem that does not require compilation.
-* Wait until it added to lambdagems.com.
+* Create your own custom layer with the gem: http://rubyonjets.com/docs/custom-lambda-layers/
+* Build the gem yourself and add it to your own custom lambdagems sources. Refer to the Lambda Gems Docs: http://rubyonjets.com/docs/lambdagems
 <% if agree.yes? -%>
 * No need to report this to us, as we've already been notified.
 <% elsif agree.no? -%>
