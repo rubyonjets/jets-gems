@@ -11,6 +11,10 @@ module Jets::Gems
       @missing_gems = [] # keeps track of gems that are not found in any of the lambdagems sources
     end
 
+    def run!
+      run(exit_early: true)
+    end
+
     # Checks whether the gem is found on at least one of the lambdagems sources.
     # By the time the loop finishes, found_gems will hold a map of gem names to found
     # url sources. Example:
@@ -20,7 +24,7 @@ module Jets::Gems
     #     "pg-0.21.0" => "https://anothersource.com",
     #   }
     #
-    def run!
+    def run(exit_early: false)
       puts "Checking projects gems for binary Lambda gems..."
       found_gems = {}
       compiled_gems.each do |gem_name|
@@ -41,12 +45,11 @@ module Jets::Gems
         end
       end
 
-      unless @missing_gems.empty?
+      if exit_early && !@missing_gems.empty?
         # Exits early if not all the linux gems are available.
         # Better to error now than deploy a broken package to AWS Lambda.
         # Provide users with message about using their own lambdagems source.
         puts missing_message
-
         Report.missing(@missing_gems) if agree.yes?
         exit 1
       end
