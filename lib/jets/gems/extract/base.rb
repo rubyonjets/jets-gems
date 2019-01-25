@@ -24,7 +24,7 @@ module Jets::Gems::Extract
     end
 
     def sh(command)
-      say "=> #{command}".color:green)
+      say "=> #{command}".color(:green)
       success = system(command)
       abort("Command Failed") unless success
       success
