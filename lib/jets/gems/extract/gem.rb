@@ -9,7 +9,7 @@ require "gems"
 #
 module Jets::Gems::Extract
   class Gem < Base
-    VERSION_PATTERN = /-(\d+\.\d+\.\d+.*)/
+    VERSION_PATTERN = /-(\d+\.\d+.*)/
 
     def run
       say "Looking for #{full_gem_name} gem in: #{@options[:source_url]}"
