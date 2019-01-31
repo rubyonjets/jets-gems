@@ -77,7 +77,6 @@ Jets is unable to build a deployment package that will work on AWS Lambda withou
 
 * Use another gem that does not require compilation.
 * Create your own custom layer with the gem: http://rubyonjets.com/docs/custom-lambda-layers/
-* Build the gem yourself and add it to your own custom lambdagems sources. Refer to the Lambda Gems Docs: http://rubyonjets.com/docs/lambdagems
 <% if agree.yes? -%>
 * No need to report this to us, as we've already been notified.
 <% elsif agree.no? -%>
@@ -85,6 +84,7 @@ Jets is unable to build a deployment package that will work on AWS Lambda withou
 <% end -%>
 
 Compiled gems usually take some time to figure out how to build as they each depend on different libraries and packages.
+More info: http://rubyonjets.com/docs/lambdagems/
 
 EOL
       erb = ERB.new(template, nil, '-') # trim mode https://stackoverflow.com/questions/4632879/erb-template-removing-the-trailing-line
