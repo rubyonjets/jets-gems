@@ -157,23 +157,10 @@ EOL
     #
     # Thanks: https://gist.github.com/aelesbao/1414b169a79162b1d795 and
     #   https://stackoverflow.com/questions/5165950/how-do-i-get-a-list-of-gems-that-are-installed-that-have-native-extensions
-    def specs_with_extensions
-      # puts "Jets::Gems::Check#specs_with_extensions".color:red)
-      # puts "BUNDLE_GEMFILE #{ENV['BUNDLE_GEMFILE'].inspect}"
-      # puts "Jets.root #{Jets.root}"
-      # puts "Dir.pwd #{Dir.pwd}"
-      # ENV['BUNDLE_GEMFILE'] = nil
-      # puts "BUNDLE_GEMFILE2 #{ENV['BUNDLE_GEMFILE'].inspect}"
-      # gemfile = IO.readlines("#{Dir.pwd}/Gemfile")
-      # puts gemfile
-
-      specs = Gem::Specification.each.select { |spec| spec.extensions.any?  }
-      specs.reject! { |spec| weird_gems.include?(spec.name) }
-      specs
-    end
-
     def gemspec_compiled_gems
-      specs_with_extensions.map(&:full_name)
+      specs = Gem::Specification.each.select { |spec| spec.extensions.any?  }
+      specs.reject! { |spec| weird_gem?(spec.name) }
+      specs.map(&:full_name)
     end
 
     # Filter out the weird special case gems that bundler deletes?
@@ -183,8 +170,10 @@ EOL
     #   The gem json has been deleted. It was installed at:
     #   /home/ec2-user/.rbenv/versions/2.5.1/lib/ruby/gems/2.5.0/gems/json-2.1.0
     #
-    def weird_gems
-      %w[json]
+    def weird_gem?(name)
+      command = "bundle show #{name} 2>&1"
+      output = `#{command}`
+      output.include?("has been deleted")
     end
   end
 end
