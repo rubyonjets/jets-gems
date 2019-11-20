@@ -1,5 +1,7 @@
 # Jets Gems
 
+[![BoltOps Badge](https://img.boltops.com/boltops/badges/boltops-badge.png)](https://www.boltops.com)
+
 [Jets](http://rubyonjets.com/) is a Ruby Serverless Framework on AWS Lambda.  allows you to create serverless applications with a beautiful language: Ruby. It includes everything required to build an application and deploy it to AWS Lambda. Jets makes serverless simple.
 
 The jets-gems library works with Jets to download and extract pre-compiled gems that work on AWS Lambda.
