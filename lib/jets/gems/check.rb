@@ -80,7 +80,10 @@ Jets is unable to build a deployment package that will work on AWS Lambda withou
 <% if agree.yes? -%>
 * No need to report this to us, as we've already been notified.
 <% elsif agree.no? -%>
-* You have choosen not to report data to lambdagems so we will not be notified about these missing gems.  If you change your mind you can edit ~/.jets/agree
+* You have choosen not to report data to lambdagems so we will not be notified about these missing gems.  You can edit ~/.jets/agree to change this.
+* Reporting gems generally allows Lambdagems to build the missing gems within a few minutes.
+* You can try redeploying again after a few minutes.
+* Non-reported gems may take days or even longer to be built.
 <% end -%>
 
 Compiled gems usually take some time to figure out how to build as they each depend on different libraries and packages.
@@ -96,53 +99,32 @@ EOL
     end
     memoize :agree
 
-    # If there are subfolders compiled_gem_paths might have files deeper
-    # in the directory tree.  So lets grab the gem name and figure out the
-    # unique paths of the compiled gems from there.
-    def compiled_gems
-      # @use_gemspec option  finds compile gems with Gem::Specification
-      # The normal build process does not use this and checks the file system.
-      # So @use_gemspec is only used for this command:
-      #
-      #   jets gems:check
-      #
-      # This is because it seems like some gems like json are remove and screws things up.
-      # We'll filter out for the json gem as a hacky workaround, unsure if there are more
-      # gems though that exhibit this behavior.
-      if @options[:cli]
-        gemspec_compiled_gems
-      else
-        compiled_gems = compiled_gem_paths.map { |p| gem_name_from_path(p) }.uniq
-        # Double check that the gems are also in the gemspec list since that
-        # one is scoped to Bundler and will only included gems used in the project.
-        # This handles the possiblity of stale gems leftover from previous builds
-        # in the cache.
-        # TODO: figure out if we need
-        # compiled_gems.select { |g| gemspec_compiled_gems.include?(g) }
-      end
-    end
-
-    # Use pre-compiled gem because the gem could have development header shared
-    # object file dependencies.  The shared dependencies are packaged up as part
-    # of the pre-compiled gem so it is available in the Lambda execution environment.
+    # Context, observations, and history:
     #
-    # Example paths:
-    # Macosx:
-    #   opt/ruby/gems/2.5.0/extensions/x86_64-darwin-16/2.5.0-static/nokogiri-1.8.1
-    #   opt/ruby/gems/2.5.0/extensions/x86_64-darwin-16/2.5.0-static/byebug-9.1.0
-    # Official AWS Lambda Linux AMI:
-    #   opt/ruby/gems/2.5.0/extensions/x86_64-linux/2.5.0-static/nokogiri-1.8.1
-    # Circleci Ubuntu based Linux:
-    #   opt/ruby/gems/2.5.0/extensions/x86_64-linux/2.5.0/pg-0.21.0
-    def compiled_gem_paths
-      Dir.glob("#{Jets.build_root}/stage/opt/ruby/gems/*/extensions/**/**/*.{so,bundle}")
-    end
-
-    # Input: opt/ruby/gems/2.5.0/extensions/x86_64-darwin-16/2.5.0-static/byebug-9.1.0
-    # Output: byebug-9.1.0
-    def gem_name_from_path(path)
-      regexp = %r{opt/ruby/gems/\d+\.\d+\.\d+/extensions/.*?/.*?/(.*?)/}
-      path.match(regexp)[1] # gem_name
+    # Two ways to check if gem is compiled.
+    #
+    #     1. compiled_gem_paths - look for .so and .bundle extension files in the folder itself.
+    #     2. gemspec - uses the gemspec metadata.
+    #
+    # Observations:
+    #
+    #     * The gemspec approach generally finds more compiled gems than the compiled_gem_paths approach.
+    #     * So when using the compiled_gem_paths some compiled are missed and not properly detected like http-parser.
+    #     * However, some gemspec found compiled gems like json are weird and they don't work when they get replaced.
+    #
+    # History:
+    #
+    #     * Started with compiled_gem_paths approach
+    #     * Tried to gemspec approach, but ran into json-2.1.0 gem issues. bundler removes? http://bit.ly/39T8uln
+    #     * Went to selective checking approach with `cli: true` option. This helped gather more data.
+    #       * jets deploy - compiled_gem_paths
+    #       * jets gems:check - gemspec_compiled_gems
+    #     * Going back to compiled_gem_paths with.
+    #       * Using the `weird_gem?` check to filter out gems removed by bundler. Note: Only happens with specific versions of json.
+    #       * Removed compiled_gem_paths and compiled_gem_paths methods. Can get it from git history if needed again.
+    #
+    def compiled_gems
+      gemspec_compiled_gems
     end
 
     # So can also check for compiled gems with Gem::Specification
