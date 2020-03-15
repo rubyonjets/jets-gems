@@ -119,12 +119,61 @@ EOL
     #     * Went to selective checking approach with `cli: true` option. This helped gather more data.
     #       * jets deploy - compiled_gem_paths
     #       * jets gems:check - gemspec_compiled_gems
-    #     * Going back to compiled_gem_paths with.
+    #     * Going back to compiled_gem_paths with:
     #       * Using the `weird_gem?` check to filter out gems removed by bundler. Note: Only happens with specific versions of json.
-    #       * Removed compiled_gem_paths and compiled_gem_paths methods. Can get it from git history if needed again.
+    #     * Keeping compiled_gem_paths for Jets Afterburner mode. Default to gemspec_compiled_gems otherwise
+    #
     #
     def compiled_gems
-      gemspec_compiled_gems
+      # @use_gemspec option  finds compile gems with Gem::Specification
+      # The normal build process does not use this and checks the file system.
+      # So @use_gemspec is only used for this command:
+      #
+      #   jets gems:check
+      #
+      # This is because it seems like some gems like json are remove and screws things up.
+      # We'll filter out for the json gem as a hacky workaround, unsure if there are more
+      # gems though that exhibit this behavior.
+      if @options[:use_gemspec] == false
+        # Afterburner mode
+        compiled_gems = compiled_gem_paths.map { |p| gem_name_from_path(p) }.uniq
+        # Double check that the gems are also in the gemspec list since that
+        # one is scoped to Bundler and will only included gems used in the project.
+        # This handles the possiblity of stale gems leftover from previous builds
+        # in the cache.
+        # TODO: figure out if we need
+        # compiled_gems.select { |g| gemspec_compiled_gems.include?(g) }
+      else
+        # default when use_gemspec not set
+        #
+        #     jets deploy
+        #     jets gems:check
+        #
+        gemspec_compiled_gems
+      end
+    end
+
+    # Use pre-compiled gem because the gem could have development header shared
+    # object file dependencies.  The shared dependencies are packaged up as part
+    # of the pre-compiled gem so it is available in the Lambda execution environment.
+    #
+    # Example paths:
+    # Macosx:
+    #   opt/ruby/gems/2.5.0/extensions/x86_64-darwin-16/2.5.0-static/nokogiri-1.8.1
+    #   opt/ruby/gems/2.5.0/extensions/x86_64-darwin-16/2.5.0-static/byebug-9.1.0
+    # Official AWS Lambda Linux AMI:
+    #   opt/ruby/gems/2.5.0/extensions/x86_64-linux/2.5.0-static/nokogiri-1.8.1
+    # Circleci Ubuntu based Linux:
+    #   opt/ruby/gems/2.5.0/extensions/x86_64-linux/2.5.0/pg-0.21.0
+    def compiled_gem_paths
+      Dir.glob("#{Jets.build_root}/stage/opt/ruby/gems/*/extensions/**/**/*.{so,bundle}")
+    end
+
+    # Input: opt/ruby/gems/2.5.0/extensions/x86_64-darwin-16/2.5.0-static/byebug-9.1.0
+    # Output: byebug-9.1.0
+    def gem_name_from_path(path)
+      regexp = %r{opt/ruby/gems/\d+\.\d+\.\d+/extensions/.*?/.*?/(.*?)/}
+      path.match(regexp)[1] # gem_name
     end
 
     # So can also check for compiled gems with Gem::Specification
