@@ -149,9 +149,28 @@ EOL
         #     jets deploy
         #     jets gems:check
         #
-        gemspec_compiled_gems
+        gems = gemspec_compiled_gems
+        gems += other_compiled_gems
+        gems.uniq
       end
     end
+
+    # note 2.5.0/gems vs 2.5.0/extensions
+    #
+    #   /tmp/jets/demo/stage/opt/ruby/gems/2.5.0/gems/nokogiri-1.11.1-x86_64-darwin/
+    #   /tmp/jets/demo/stage/opt/ruby/gems/2.5.0/extensions/x86_64-linux/2.5.0/
+    #
+    # Also the platform is appended to the gem folder now
+    #
+    #   /tmp/jets/demo/stage/opt/ruby/gems/2.5.0/gems/nokogiri-1.11.1-x86_64-darwin
+    #   /tmp/jets/demo/stage/opt/ruby/gems/2.5.0/gems/nokogiri-1.11.1-x86_64-linux
+    #
+    def other_compiled_gems
+      paths = Dir.glob("#{Jets.build_root}/stage/opt/ruby/gems/#{Jets::Gems.ruby_folder}/gems/*{-darwin,-linux}")
+      paths.map { |p| File.basename(p).sub(/-x\d+.*-(darwin|linux)/,'') }
+    end
+
+
 
     # Use pre-compiled gem because the gem could have development header shared
     # object file dependencies.  The shared dependencies are packaged up as part
