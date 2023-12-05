@@ -1,3 +1,5 @@
+**IMPORTANT**: This library is not longer used. It's been archived and kept around for posterity only.
+
 # Jets Gems
 
 [![BoltOps Badge](https://img.boltops.com/boltops/badges/boltops-badge.png)](https://www.boltops.com)
